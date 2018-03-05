@@ -54,8 +54,10 @@ class Show {
 			try {
 				$shows = array();
 				$limitStart = $this->getLimitStart($pageNumber, $showsPerPage);
-				$sql = "select id, title, description, duration, originalAirDate, rating, keywords from shows order by ".$sortBy." ".$sortDirection." limit :limitStart, :showsPerPage";
+				$sql = "select id, title, description, duration, originalAirDate, rating, keywords from shows order by :sortBy :sortDirection limit :limitStart, :showsPerPage";
 				$stmt = $this->conn->prepare($sql);
+				$stmt->bindParam("sortBy", $this->sanitizeXss($sortBy));
+				$stmt->bindParam("sortDirection", $this->sanitizeXss($sortDirection));
 				$stmt->bindParam("limitStart", $limitStart, PDO::PARAM_INT);
 				$stmt->bindParam("showsPerPage", $showsPerPage, PDO::PARAM_INT);
 
@@ -212,7 +214,7 @@ class Show {
 	
 	function getLimitStart($pageNumber, $showsPerPage) {
 		if($pageNumber > 1) {
-			return ($pageNumber - 1) * $showPerPage;
+			return ($pageNumber - 1) * $showsPerPage;
 		}
 		
 		return 0;
